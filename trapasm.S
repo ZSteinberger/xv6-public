@@ -10,10 +10,13 @@ alltraps:
   pushl %gs
   pushal
   
-  # Set up data segments.
+  # Set up data and per-cpu segments.
   movw $(SEG_KDATA<<3), %ax
   movw %ax, %ds
   movw %ax, %es
+  movw $(SEG_KCPU<<3), %ax
+  movw %ax, %fs
+  movw %ax, %gs
 
   # Call trap(tf), where tf=%esp
   pushl %esp
@@ -30,3 +33,14 @@ trapret:
   popl %ds
   addl $0x8, %esp  # trapno and errcode
   iret
+
+.globl read_cr2
+read_cr2:
+  movl %cr2, %eax
+  ret
+
+.globl flush_tlb_all
+flush_tlb_all:
+  movl %cr3, %eax
+  movl %eax,%cr3
+  ret
